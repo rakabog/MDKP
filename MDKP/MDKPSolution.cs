@@ -10,16 +10,54 @@ namespace MDKP
     internal class MDKPSolution
     {
         public enum MDKPItemStatus { Using, NotUsing, Unknown};
-        MDKPInstance        mInstanace;
+        MDKPInstance     mInstanace;
         MDKPItemStatus[] mItemStatuses;
         int              mObjective;
+        public int       mNumCreatedDuplicate;
                
         List<int>           mSelectedItems;
 
-
+        public int[] mAvailableCapacity; 
         public MDKPItemStatus[] ItemStatuses
         {
             get { return mItemStatuses; }
+        }
+
+        public int Objective { 
+            get { return mObjective; }
+        }
+        public void CalculateAvaillableCapacity() {
+
+
+            mAvailableCapacity = new int[mInstanace.NumConstraints];
+
+            for (int j = 0; j < mInstanace.NumConstraints; j++)
+            {
+                mAvailableCapacity[j] = mInstanace.Capacities[j];
+            }
+
+            for (int i = 0; i < mInstanace.NumItems; i++)
+            {
+                if (mItemStatuses[i] == MDKPItemStatus.Using)
+                {
+                    for (int j = 0; j < mInstanace.NumConstraints; j++)
+                    {
+
+                        mAvailableCapacity[j] -= mInstanace.ItemWeights[i][j];
+                    }
+                }
+            }
+
+        }
+        public bool CanSwap(int GoingOut, int GoingIn) {
+
+            for (int i = 0; i < mInstanace.NumConstraints; i++) {
+
+                if (mAvailableCapacity[i] + mInstanace.ItemWeights[GoingOut][i] < mInstanace.ItemWeights[GoingIn][i])
+                    return false;
+            }
+
+            return true;
         }
 
         public MDKPSolution(MDKPInstance iInstanace) {
@@ -29,7 +67,63 @@ namespace MDKP
             Allocate();
 
         }
+        public bool Improve(Random iGenerator) {
 
+            List<int> Indexes = new List<int>();
+
+            for (int i = 0; i < mInstanace.NumItems; i++)
+                Indexes.Add(i);
+
+            MDKPProblem.shuffle<int>(Indexes, iGenerator);
+            CalculateAvaillableCapacity();
+
+            int GoingOut;
+            int GoingIn;
+            bool Improve = true ;
+
+            while (Improve)
+            {
+                Improve = false;
+                for (int i = 0; i < mInstanace.NumItems; i++)
+                {
+                    for (int j = i + 1; j < mInstanace.NumItems; j++)
+                    {
+                        if (ItemStatuses[Indexes[i]] != ItemStatuses[Indexes[j]])
+                        {
+
+                            if (ItemStatuses[Indexes[i]] == MDKPItemStatus.Using)
+                            {
+                                GoingOut = Indexes[i];
+                                GoingIn = Indexes[j];
+                            }
+                            else
+                            {
+                                GoingIn = Indexes[i];
+                                GoingOut = Indexes[j];
+                            }
+
+                            if (mInstanace.ItemValues[GoingIn] <= mInstanace.ItemValues[GoingOut])
+                                continue;
+
+                            if (CanSwap(GoingOut, GoingIn))
+                            {
+                                Improve = true;
+                                ItemStatuses[GoingOut] = MDKPItemStatus.NotUsing;
+                                ItemStatuses[GoingIn] = MDKPItemStatus.Using;
+                                for (int k = 0; k < mInstanace.NumConstraints; k++)
+                                {
+
+                                    mAvailableCapacity[k] += mInstanace.ItemWeights[GoingIn][k] - mInstanace.ItemWeights[GoingOut][k];
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
         public MDKPSolution(List<int> indexes, MDKPInstance iInstanace)
         {
 

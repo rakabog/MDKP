@@ -26,23 +26,27 @@ namespace MDKP
             MDKPInstance TestInstance = new MDKPInstance();
 
 //            TestInstance.LoadType2("c:\\primeri\\MDKP\\cb1.DAT");
-            TestInstance.LoadType2("c:\\primeri\\MDKP\\250_30_0.dat");
+            TestInstance.Load_CB("c:\\primeri\\MDKP\\mknapcb9.txt",25);
                         MDKPCplex T = new MDKPCplex(TestInstance);
-                      T.TimeLimit = 400;
+                      T.TimeLimit = 600;
      //       MDKPFix Fix = new MDKPFix(63);
-  //          T.Solve();
+//            T.Solve();
             
      //       int a = T.Solution.GetNumberOfUsedItems();
      //       int b = T.Solution.CalculateObjective();
 
             MDKPProblem Problem = new MDKPProblem(TestInstance);
 
-            Problem.SolveFixSet(20, 1000, 100, 3);
+            Problem.TimeLimit = 2000 * 1000;
+            Problem.InitRandom(2);
+             Problem.SolveFixSet(100,8, 10000, 100,0.1);
             //          Problem.SolveStepGreedy(50, 1);
-//            Problem.GenerateInitialPopulation(10, 50, 1);
-       //     Problem.SolveMH(40,100, 2);
+            //            Problem.GenerateInitialPopulation(10, 50, 1);
+            //     Problem.SolveMH(40,100, 2);
 
+            MDKPExperiments Exp = new MDKPExperiments();
 
+      //     Exp.SolveAll();
 //            System.Console.WriteLine(Problem.Solution.CalculateObjective());
             System.Console.ReadKey();
         }

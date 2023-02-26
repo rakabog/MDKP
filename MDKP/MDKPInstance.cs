@@ -54,6 +54,17 @@ namespace MDKP
 
         }
 
+        public void LoadOptimum(string FileName, int Index)
+        {
+            string[] Lines = File.ReadAllLines(FileName);
+            string[] words = Lines[Index].Split(',');
+            double result;
+
+            if (double.TryParse(words[1], out result) ){
+                mOptimal = (int)Math.Round(result);
+            }
+        }
+
 
         public MDKPInstance(int iNumItems, int iNumConstraints) {
 
@@ -69,6 +80,70 @@ namespace MDKP
             mItemWeights = new int[mNumItems][];
             for (int i = 0; i < mNumItems; i++)
                 mItemWeights[i] = new int[mNumConstraints];
+        }
+
+
+
+
+        public bool Load_CB(string FileName, int InstanceNumber)
+        {
+            String[] Lines = File.ReadAllLines(FileName);
+            string[] words;
+            int temp;
+            List<int> AllValues = new List<int>();
+            int cNumberOfInstances;
+            int cNumItems;
+            int cNumConstraints;
+
+            for (int i = 0; i < Lines.Length; i++)
+            {
+
+                words = Lines[i].Split(' ');
+                for (int j = 0; j < words.Length; j++)
+                {
+                    if (int.TryParse(words[j], out temp))
+                        AllValues.Add(int.Parse(words[j]));
+                }
+            }
+
+            
+
+
+            cNumberOfInstances = AllValues[0]-1;
+
+            if (cNumberOfInstances < InstanceNumber)
+                return false;
+
+            int cInstanceNumber = InstanceNumber;
+            cNumItems = AllValues[1];
+            cNumConstraints = AllValues[2];
+
+            int counter = 1 + cInstanceNumber * (3 + cNumConstraints + (cNumConstraints + 1) * cNumItems);
+
+
+            mNumItems = AllValues[counter++];
+            mNumConstraints = AllValues[counter++];
+            mOptimal = AllValues[counter++];
+
+            Allocate();
+
+            for (int i = 0; i < mNumItems; i++)
+                mItemValues[i] = AllValues[counter++];
+
+            for (int j = 0; j < mNumConstraints; j++)
+            {
+                for (int i = 0; i < mNumItems; i++)
+                {
+                    mItemWeights[i][j] = AllValues[counter++];
+                }
+            }
+
+            for (int i = 0; i < mNumConstraints; i++)
+                mCapacities[i] = AllValues[counter++];
+
+
+            return true;
+            
         }
 
         public void Load(string FileName) {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using ILOG.Concert;
+﻿using ILOG.Concert;
 using ILOG.CPLEX;
 
 namespace MDKP
@@ -203,11 +198,11 @@ namespace MDKP
                 }
             }
 
-            cplex.ExportModel("lpex1.lp");
+         //   cplex.ExportModel("lpex1.lp");
 
             if(mTimeLimit>0)
                 cplex.SetParam(Cplex.Param.TimeLimit, mTimeLimit);
-            //cplex.SetOut(null);
+          cplex.SetOut(null);
                 
 
             
@@ -239,10 +234,10 @@ namespace MDKP
                 mSolution = null;
                 Console.WriteLine("Failed to find a solution.");
             }
-
+            cplex.End();
         }
 
-        
+       
 
     }
 

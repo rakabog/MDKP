@@ -17,7 +17,34 @@ namespace MDKP
         int[]              mNotUsedCounter;
         int[,]             mPairTracking; 
         int                mMaxSolutions;
-        int                mMinObjective;
+
+
+        public int NumberOfSolutions
+        {
+            get { return mSolutions.Count; }
+        }
+
+        public MDKPSolution GetBestFit(MDKPSolution.MDKPItemStatus[] iStates) {
+            bool Fit;
+
+            for (int i = 0; i < mSolutions.Count; i++) {
+
+                Fit = true;
+                for (int j = 0; j < mInstance.NumItems; j++) {
+
+                    if ((iStates[j] != MDKPSolution.MDKPItemStatus.Unknown) && (iStates[j] != mSolutions[i].ItemStatuses[j]))
+                    {
+                        Fit = false;
+                        break;
+                    }
+                }
+
+                if(Fit)
+                    return mSolutions[i];
+            }
+
+            return null;
+        }
 
 
         public MDKPSolutionTracker(int iMaxSolutions, MDKPInstance iInstance) { 
@@ -191,36 +218,52 @@ namespace MDKP
             }
         }
 
-        public bool AddSolution(MDKPSolution iSolution) {
+        public void RemoveSolution(int Index) {
+
+            if (Index < mSolutions.Count)
+            {
+                mSolutions.RemoveAt(Index);
+            }
+        }
+
+        public int AddSolution(MDKPSolution iSolution) {
 
             int tObjective = iSolution.CalculateObjective();
 
-            
 
-                for (int i = 0; i < mSolutions.Count; i++)
-                {
-                    if (mSolutions[i].IsSame(iSolution))
-                            return false;
-
-                    if (mSolutions[i].CalculateObjective() <= tObjective) {
-
-                        mSolutions.Insert(i, iSolution);
-
-                        if (mSolutions.Count > mMaxSolutions) {
-                            mSolutions.RemoveAt(mSolutions.Count - 1);
-                        }
-                        return true;
-                    }
-                }
-            
-
-            mSolutions.Add(iSolution);
-            if (mSolutions.Count > mMaxSolutions)
+            for (int i = 0; i < mSolutions.Count; i++)
             {
-                mSolutions.RemoveAt(mSolutions.Count - 1);
+                if (mSolutions[i].IsSame(iSolution))
+                {
+                    return -1;
+                }
             }
 
-            return true;
+            for (int i = 0; i < mSolutions.Count; i++)
+            {
+                        if (mSolutions[i].IsSame(iSolution))
+                        {
+                            return -1;
+                        }
+
+                        if (mSolutions[i].CalculateObjective() <= tObjective) {
+
+                            mSolutions.Insert(i, iSolution);
+                            if (mSolutions.Count > mMaxSolutions) {
+                                mSolutions.RemoveAt(mSolutions.Count - 1);
+                            }
+                            return i;
+                        }
+            }
+
+            if (mSolutions.Count < mMaxSolutions)
+            {
+                mSolutions.Add(iSolution);
+                return mSolutions.Count-1;
+            }
+            
+
+            return -1;
         }
 
         public void Allocate() {
