@@ -150,7 +150,7 @@ namespace MDKP
         }
         
 
-        public void SolveFixSet(int PopulationSize, int K, int MaxIterations, int iMaxItems, double MaxCalcTime) {
+        public void SolveFixSet(int PopulationSize, int K, int MaxIterations, int iMaxItems, int MaxStag, double MaxCalcTime) {
 
             List<int> SolutionIndexes= new List<int>();
             List<int> SelIndexes = new List<int>();
@@ -196,15 +196,15 @@ namespace MDKP
                 shuffle<int>(SolutionIndexes, mGenerator);
                 SelIndexes.Clear();
 
-                /*
-                cK = 2 + mGenerator.Next() % K;
+
+                cK = 5 + mGenerator.Next() % K;
 
                 if (mSolutionTracker.NumberOfSolutions < cK)
                     cK = mSolutionTracker.NumberOfSolutions;
                 else
                     cK = K;
-                */
-                for (int s = 0; s < K; s++) {
+/*                */
+                for (int s = 0; s < cK; s++) {
                     SelIndexes.Add(SolutionIndexes[s]);
                 
                 }
@@ -232,7 +232,10 @@ namespace MDKP
                 mSolution.CalculateObjective();
                 AddIndex = mSolutionTracker.AddSolution(mSolution);
 
-                CheckBest();
+                if (CheckBest()) {
+
+                    BestMaxCalcTime = cMaxCalcTime;
+                }
 
 
                 if (AddIndex >= 0 )
@@ -240,9 +243,12 @@ namespace MDKP
                     Stag=0;
                 }
 
-                if (Stag >= 100)
+                if (Stag >=  MaxStag)
                 {
                        cMaxCalcTime = cMaxCalcTime * 2;
+
+         //           if (BestMaxCalcTime / cMaxCalcTime > 4)
+//                        break;
                        Stag = 0;
                 }
 

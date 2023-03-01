@@ -210,7 +210,7 @@ namespace MDKP
             {
                 mSolution = new MDKPSolution(mInstance);
                 
-                Console.WriteLine("Solution value: " + cplex.ObjValue);
+                Console.WriteLine("Solution value: " + cplex.ObjValue + "  Thread :" + Thread.CurrentThread.ManagedThreadId);
 
                 double[] xres = cplex.GetValues(x);
 
